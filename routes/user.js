@@ -3,8 +3,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { z } = require("zod");
 
-const { userModel } = require("../db");
+const { userModel, purchaseModel, courseModel } = require("../db");
 const { JWT_USER_PASSWORD } = require("../config");
+const { userMiddleware } = require("../middleware/user");
 
 const userRouter = Router();
 
@@ -106,8 +107,21 @@ userRouter.post("/login", async (req, res) => {
     }
 });
 
-userRouter.get("/purchases", (req, res) => {
-    res.json("user purchases endpoint")
+userRouter.get("/purchases", userMiddleware, async (req, res) => {
+    const userId = req.userId;
+
+    const purchases = await purchaseModel.find({
+        userId
+    })
+    const coursesData = await courseModel.find({
+        _id: { $in: purchases.map(x => x.courseId) }
+    })
+
+    res.json({
+        message: "user purchases endpoint",
+        purchases,
+        coursesData
+    })
 })
 
 module.exports = {

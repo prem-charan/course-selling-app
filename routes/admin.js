@@ -130,20 +130,24 @@ adminRouter.put("/course",adminMiddleware, async (req, res) => {
 
     const { title, description, imageUrl, price, courseId } = req.body;
 
-    const course = await courseModel.updateOne({
-        _id: courseId,
-        creatorId: adminId
-    }, {
-        title: title,
-        description: description,
-        imageUrl: imageUrl,
-        price: price
-    })
-
-    res.json({
-        message: "Course updated",
-        courseId: course._id
-    })
+    try {
+        const course = await courseModel.updateOne({
+            _id: courseId,
+            creatorId: adminId
+        }, {
+            title: title,
+            description: description,
+            imageUrl: imageUrl,
+            price: price
+        })
+    
+        return res.json({
+            message: "Course updated",
+            courseId: course._id
+        })
+    } catch(e) {
+        return res.json({message: "Invalid course credentials"})
+    }
 });
 
 adminRouter.get("/course/bulk", adminMiddleware, async (req, res) => {
